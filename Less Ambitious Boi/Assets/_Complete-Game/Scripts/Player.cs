@@ -19,6 +19,7 @@ namespace Completed
 		public AudioClip drinkSound2;				//2 of 2 Audio clips to play when player collects a soda object.
 		public AudioClip gameOverSound;				//Audio clip to play when player dies.
         public Text aiText;
+        public int hp = 1;
         public static int turn = 1;
 
 
@@ -52,6 +53,7 @@ namespace Completed
 		{
 			//If it's not the player's turn, exit the function.
 			if(!GameManager.instance.playersTurn) return;
+            CheckIfGameOver();
             aiText.text = "";
             int horizontal = 0;  	//Used to store the horizontal move direction.
 			int vertical = 0;		//Used to store the vertical move direction.
@@ -141,7 +143,16 @@ namespace Completed
 		//CheckIfGameOver checks if the player is out of food points and if so, ends the game.
 		private void CheckIfGameOver ()
 		{
+            if (hp == 0)
+            {
+                GameManager.instance.GameOver();
+            }
 		}
+
+        public void DamagePlayer()
+        {
+            hp -= 1;
+        }
 	}
 }
 

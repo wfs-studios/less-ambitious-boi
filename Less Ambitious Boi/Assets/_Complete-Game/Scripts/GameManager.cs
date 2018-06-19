@@ -12,9 +12,9 @@ namespace Completed
 	{
 		public float levelStartDelay = 2f;						//Time to wait before starting level, in seconds.
 		public float turnDelay = 0.1f;							//Delay between each Player turn.
-		public int playerFoodPoints = 100;						//Starting value for Player food points.
 		public static GameManager instance = null;				//Static instance of GameManager which allows it to be accessed by any other script.
-		[HideInInspector] public bool playersTurn = true;		//Boolean to check if it's players turn, hidden in inspector but public.
+        public GameObject[] bullet;
+        [HideInInspector] public bool playersTurn = true;		//Boolean to check if it's players turn, hidden in inspector but public.
 		
 		
 		private Text levelText;									//Text to display current level number.
@@ -22,7 +22,6 @@ namespace Completed
 		private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
 		private int level = 1;									//Current level number, expressed in game as "Day 1".
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
-        private List<InnocentAI> innocents;
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
 		
@@ -48,7 +47,6 @@ namespace Completed
 			
 			//Assign enemies to a new List of Enemy objects.
 			enemies = new List<Enemy>();
-            innocents = new List<InnocentAI>();
 			
 			//Get a component reference to the attached BoardManager script
 			boardScript = GetComponent<BoardManager>();
@@ -98,7 +96,6 @@ namespace Completed
 			
 			//Clear any Enemy objects in our List to prepare for next level.
 			enemies.Clear();
-            innocents.Clear();
 			
 			//Call the SetupScene function of the BoardManager script, pass it current level number.
 			boardScript.SetupScene(level);
@@ -126,7 +123,6 @@ namespace Completed
 
             //Start moving enemies.
 			StartCoroutine (MoveEnemies ());
-            StartCoroutine (MoveInnocents());
         }
 		
 		//Call this to add the passed in Enemy to the List of Enemy objects.
@@ -136,18 +132,12 @@ namespace Completed
 			enemies.Add(script);
 		}
 
-        public void AddInnocentsToList(InnocentAI script)
-        {
-            //Add Enemy to List enemies.
-            innocents.Add(script);
-        }
-
 
         //GameOver is called when the player reaches 0 food points
         public void GameOver()
 		{
 			//Set levelText to display number of levels passed and game over message
-			levelText.text = "After " + level + " days, you starved.";
+			levelText.text = "You ded now";
 			
 			//Enable black background image gameObject.
 			levelImage.SetActive(true);
@@ -171,54 +161,25 @@ namespace Completed
 				//Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
 				yield return new WaitForSeconds(turnDelay);
 			}
-			
+
 			//Loop through List of Enemy objects.
 			for (int i = 0; i < enemies.Count; i++)
 			{
-				//Call the MoveEnemy function of Enemy at index i in the enemies List.
-				enemies[i].MoveEnemy ();
+                //Call the MoveEnemy function of Enemy at index i in the enemies List.
+                if (enemies[i] != null)
+                {
+                    enemies[i].MoveEnemy();
+                }
 				
 				//Wait for Enemy's moveTime before moving next Enemy, 
-				yield return new WaitForSeconds(enemies[i].moveTime);
+				//yield return new WaitForSeconds(enemies[i].moveTime);
 			}
 			//Once Enemies are done moving, set playersTurn to true so player can move.
-			//playersTurn = true;
+			playersTurn = true;
 			
 			//Enemies are done moving, set enemiesMoving to false.
-			//enemiesMoving = false;
+			enemiesMoving = false;
 		}
-
-        //Coroutine to move enemies in sequence.
-        IEnumerator MoveInnocents()
-        {
-            //While enemiesMoving is true player is unable to move.
-            //enemiesMoving = true;
-
-            //Wait for turnDelay seconds, defaults to .1 (100 ms).
-            yield return new WaitForSeconds(turnDelay);
-
-            //If there are no enemies spawned (IE in first level):
-            if (innocents.Count == 0)
-            {
-                //Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
-                yield return new WaitForSeconds(turnDelay);
-            }
-
-            //Loop through List of Enemy objects.
-            for (int i = 0; i < innocents.Count; i++)
-            {
-                //Call the MoveEnemy function of Enemy at index i in the enemies List.
-                innocents[i].MoveInnocent();
-
-                //Wait for Enemy's moveTime before moving next Enemy, 
-                yield return new WaitForSeconds(innocents[i].moveTime);
-            }
-            //Once Enemies are done moving, set playersTurn to true so player can move.
-            playersTurn = true;
-
-            //Enemies are done moving, set enemiesMoving to false.
-            enemiesMoving = false;
-        }
     }
 }
 

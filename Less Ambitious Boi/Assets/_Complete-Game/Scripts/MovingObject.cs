@@ -8,8 +8,6 @@ namespace Completed
 	public abstract class MovingObject : MonoBehaviour
 	{
         public GameObject[] floor;
-        Stack<Tile> path = new Stack<Tile>();
-        Tile currentTile;
 
 
         public float moveTime = 0.1f;			//Time it will take object to move, in seconds.

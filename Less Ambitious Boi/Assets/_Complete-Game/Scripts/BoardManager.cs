@@ -26,7 +26,7 @@ namespace Completed
 		}
 		
 		
-		public int columns = 10; 										//Number of columns in our game board.
+		public int columns = 50; 										//Number of columns in our game board.
 		public int rows = 10;											//Number of rows in our game board.
 		public Count wallCount = new Count (10, 30);					//Lower and upper limit for our random number of walls per level.
 		public Count foodCount = new Count (1, 6);						//Lower and upper limit for our random number of food items per level.
@@ -37,12 +37,12 @@ namespace Completed
 		public GameObject[] innocentTiles;								//Array of enemy prefabs.
         public GameObject[] enemyTiles;                                 //Array of enemy prefabs.
         public GameObject[] outerWallTiles;								//Array of outer tile prefabs.
-        //public static List<FloorMap> floorMap = new List<FloorMap>();
         public Sprite[] floorSprites;
         public int randomizer;
 		
 		private Transform boardHolder;									//A variable to store a reference to the transform of our Board object.
 		private List <Vector3> gridPositions = new List <Vector3> ();	//A list of possible locations to place tiles.
+        private bool start = true;
 		
 		
 		//Clears our list gridPositions and prepares it to generate a new board.
@@ -131,7 +131,7 @@ namespace Completed
 			for(int i = 0; i < objectCount; i++)
 			{
 				//Choose a position for randomPosition by getting a random position from our list of available Vector3s stored in gridPosition
-				Vector3 randomPosition = RandomPosition();
+				Vector3 randomPosition = RandomSpawn();
                 randomizer = (int)Random.Range(0, 2);
                 //Choose a random tile from tileArray and assign it to tileChoice
                 GameObject tileChoice = tileArray[randomizer];
@@ -140,10 +140,104 @@ namespace Completed
 				Instantiate(tileChoice, randomPosition, Quaternion.identity);
 			}
 		}
-		
-		
-		//SetupScene initializes our level and calls the previous functions to lay out the game board
-		public void SetupScene (int level)
+
+        void SpawnBullet(GameObject[] tileArray, int minimum, int maximum)
+        {
+            //Choose a random number of objects to instantiate within the minimum and maximum limits
+            int objectCount = 13;
+            Vector3 randomPosition;
+            GameObject tileChoice;
+            //Instantiate objects until the randomly chosen limit objectCount is reached
+            for (int i = 0; i < objectCount; i++)
+            {
+                if (start)
+                {
+                    //Choose a random tile from tileArray and assign it to tileChoice
+                    tileChoice = tileArray[0];
+                    //Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(51, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(7, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(15, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(25, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(30, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(33, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(40, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(42, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(45, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(48, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                }
+                else
+                {
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        tileChoice = tileArray[0];
+                        randomPosition = new Vector3(51, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                }
+            }
+        }
+
+        Vector3 RandomSpawn()
+        {
+            //Declare an integer randomIndex, set it's value to a random number between 0 and the count of items in our List gridPositions.
+            Vector3 randomPosition;
+
+            do
+            {
+                int randomIndex = Random.Range(0, gridPositions.Count);
+                //Declare a variable of type Vector3 called randomPosition, set it's value to the entry at randomIndex from our List gridPositions.
+                randomPosition = gridPositions[randomIndex];
+
+                //Remove the entry at randomIndex from the list so that it can't be re-used.
+                gridPositions.RemoveAt(randomIndex);
+            } while ((randomPosition.x > 50) || (randomPosition.x == 7) || (randomPosition.x == 15) || (randomPosition.x == 25) || (randomPosition.x == 30) || (randomPosition.x == 33) || (randomPosition.x == 40) || (randomPosition.x == 42) || (randomPosition.x == 45) || (randomPosition.x == 48));
+            //Return the randomly selected Vector3 position.
+            return randomPosition;
+        }
+
+        //SetupScene initializes our level and calls the previous functions to lay out the game board
+        public void SetupScene (int level)
 		{
 			//Creates the outer walls and floor.
 			BoardSetup ();
@@ -158,11 +252,12 @@ namespace Completed
             //LayoutObjectAtRandom (foodTiles, foodCount.minimum, foodCount.maximum);
 
             //Determine number of enemies based on current level number, based on a logarithmic progression
-            int innocentCount = 25;
-			
-			//Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
-			LayoutObjectAtRandom (innocentTiles, innocentCount, innocentCount);
-            LayoutObjectAtRandom(enemyTiles, 1, 1);
+            //int innocentCount = 25;
+
+            //Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
+            start = true;
+            SpawnBullet(enemyTiles, 15, 20);
+            start = false;
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
 			Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
