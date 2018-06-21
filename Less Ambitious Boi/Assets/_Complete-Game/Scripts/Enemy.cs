@@ -48,6 +48,7 @@ namespace Completed
             //Get a component reference to the component of type T attached to the object that was hit
             T hitComponent = hit.transform.GetComponent<T>();
             Wall ball = null;
+            //Ally tall = null;
             if (hitComponent == null)
             {
                 ball = hit.transform.GetComponent<Wall>();
@@ -58,8 +59,10 @@ namespace Completed
                 if (hitComponent != null)
                     OnCantMove(hitComponent);
 
-                if (ball != null)
+                else if (ball != null)
                     OnCantMove(ball);
+
+                Destroy(gameObject);
             }
         }
 
@@ -129,10 +132,9 @@ namespace Completed
                 Player hitPlayer = component as Player;
 
                 hitPlayer.DamagePlayer();
-                Destroy(gameObject);
             }
 
-            if (component is Wall)
+            else if (component is Wall)
             {
                 //Set hitWall to equal the component passed in as a parameter.
                 Wall hitWall = component as Wall;
@@ -141,6 +143,15 @@ namespace Completed
                 hitWall.DamageWall(wallDamage);
                 Destroy(gameObject);
             }
+
+            /*else if (component is Ally)
+            {
+                Ally hitAlly = component as Ally;
+
+                hitAlly.DamageAlly(playerDamage);
+                Destroy(gameObject);
+            }*/
+            //Destroy(gameObject);
 
             //Call the RandomizeSfx function of SoundManager passing in the two audio clips to choose randomly between.
             SoundManager.instance.RandomizeSfx(attackSound1, attackSound2);

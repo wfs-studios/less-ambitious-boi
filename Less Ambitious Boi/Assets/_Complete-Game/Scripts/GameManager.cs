@@ -22,6 +22,7 @@ namespace Completed
 		private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
 		private int level = 1;									//Current level number, expressed in game as "Day 1".
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
+        private List<Ally> allies;
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
 		
@@ -47,9 +48,9 @@ namespace Completed
 			
 			//Assign enemies to a new List of Enemy objects.
 			enemies = new List<Enemy>();
-			
-			//Get a component reference to the attached BoardManager script
-			boardScript = GetComponent<BoardManager>();
+            allies = new List<Ally>();
+            //Get a component reference to the attached BoardManager script
+            boardScript = GetComponent<BoardManager>();
 
             //Call the InitGame function to initialize the first level 
             InitGame();
@@ -96,6 +97,7 @@ namespace Completed
 			
 			//Clear any Enemy objects in our List to prepare for next level.
 			enemies.Clear();
+            allies.Clear();
 			
 			//Call the SetupScene function of the BoardManager script, pass it current level number.
 			boardScript.SetupScene(level);
@@ -122,7 +124,9 @@ namespace Completed
 				return;
 
             //Start moving enemies.
-			StartCoroutine (MoveEnemies ());
+            boardScript.SpawnBullet(boardScript.enemyTiles);
+			StartCoroutine(MoveEnemies ());
+            //StartCoroutine(MoveAllies());
         }
 		
 		//Call this to add the passed in Enemy to the List of Enemy objects.
@@ -132,6 +136,11 @@ namespace Completed
 			enemies.Add(script);
 		}
 
+        public void AddAlliesToList(Ally script)
+        {
+            //Add Enemy to List enemies.
+            allies.Add(script);
+        }
 
         //GameOver is called when the player reaches 0 food points
         public void GameOver()
@@ -153,7 +162,7 @@ namespace Completed
 			enemiesMoving = true;
 			
 			//Wait for turnDelay seconds, defaults to .1 (100 ms).
-			yield return new WaitForSeconds(turnDelay);
+			yield return new WaitForSeconds(.000001f);
 			
 			//If there are no enemies spawned (IE in first level):
 			if (enemies.Count == 0) 
@@ -172,7 +181,7 @@ namespace Completed
                 }
 				
 				//Wait for Enemy's moveTime before moving next Enemy, 
-				//yield return new WaitForSeconds(enemies[i].moveTime);
+				yield return new WaitForSeconds(.000001f);
 			}
 			//Once Enemies are done moving, set playersTurn to true so player can move.
 			playersTurn = true;
@@ -180,6 +189,38 @@ namespace Completed
 			//Enemies are done moving, set enemiesMoving to false.
 			enemiesMoving = false;
 		}
+
+        //Coroutine to move enemies in sequence.
+        IEnumerator MoveAllies()
+        {
+            //While enemiesMoving is true player is unable to move.
+            //enemiesMoving = true;
+
+            //Wait for turnDelay seconds, defaults to .1 (100 ms).
+            yield return new WaitForSeconds(turnDelay);
+
+            //If there are no enemies spawned (IE in first level):
+            if (allies.Count == 0)
+            {
+                //Wait for turnDelay seconds between moves, replaces delay caused by enemies moving when there are none.
+                yield return new WaitForSeconds(turnDelay);
+            }
+
+            //Loop through List of Enemy objects.
+            for (int i = 0; i < allies.Count; i++)
+            {
+                //Call the MoveEnemy function of Enemy at index i in the enemies List.
+                allies[i].MoveAlly();
+
+                //Wait for Enemy's moveTime before moving next Enemy, 
+                yield return new WaitForSeconds(.001f);
+            }
+            //Once Enemies are done moving, set playersTurn to true so player can move.
+            playersTurn = true;
+
+            //Enemies are done moving, set enemiesMoving to false.
+            enemiesMoving = false;
+        }
     }
 }
 

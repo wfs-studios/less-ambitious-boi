@@ -33,8 +33,8 @@ namespace Completed
 		public GameObject exit;											//Prefab to spawn for exit.
 		public GameObject floorTile;									//floor prefab.
 		public GameObject[] wallTiles;									//Array of wall prefabs.
-		public GameObject[] foodTiles;									//Array of food prefabs.
-		public GameObject[] innocentTiles;								//Array of enemy prefabs.
+		//public GameObject[] foodTiles;									//Array of food prefabs.
+		public GameObject[] allyTiles;								    //Array of ally prefabs.
         public GameObject[] enemyTiles;                                 //Array of enemy prefabs.
         public GameObject[] outerWallTiles;								//Array of outer tile prefabs.
         public Sprite[] floorSprites;
@@ -71,12 +71,12 @@ namespace Completed
 			//Instantiate Board and set boardHolder to its transform.
 			boardHolder = new GameObject ("Board").transform;
 			
-            randomizer = (int)Random.Range(0, 3);
+            randomizer = (int)Random.Range(0, 2);
 			//Loop along x axis, starting from -1 (to fill corner) with floor or outerwall edge tiles.
-			for(int x = -6; x < columns + 6; x++)
+			for(int x = -30; x < columns + 30; x++)
 			{
 				//Loop along y axis, starting from -1 to place floor or outerwall tiles.
-				for(int y = -2; y < rows + 3; y++)
+				for(int y = -30; y < rows + 30; y++)
 				{
                     GameObject toInstantiate = new GameObject();
 
@@ -90,7 +90,6 @@ namespace Completed
                     else
                     {
                         toInstantiate = floorTile;
-                        //floorMap.Add(new FloorMap(x, y, 0f, toInstantiate));
                     }
 
                     //Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid position in loop, cast it to GameObject.
@@ -141,7 +140,27 @@ namespace Completed
 			}
 		}
 
-        void SpawnBullet(GameObject[] tileArray, int minimum, int maximum)
+        //LayoutObjectAtRandom accepts an array of game objects to choose from along with a minimum and maximum range for the number of objects to create.
+        void LayoutAllyAtRandom(GameObject[] tileArray, int minimum, int maximum)
+        {
+            //Choose a random number of objects to instantiate within the minimum and maximum limits
+            int objectCount = Random.Range(minimum, maximum + 1);
+
+            //Instantiate objects until the randomly chosen limit objectCount is reached
+            for (int i = 0; i < objectCount; i++)
+            {
+                //Choose a position for randomPosition by getting a random position from our list of available Vector3s stored in gridPosition
+                Vector3 randomPosition = RandomSpawn();
+                randomizer = (int)Random.Range(0, 2);
+                //Choose a random tile from tileArray and assign it to tileChoice
+                GameObject tileChoice = tileArray[0];
+
+                //Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
+                Instantiate(tileChoice, randomPosition, Quaternion.identity);
+            }
+        }
+
+        public void SpawnBullet(GameObject[] tileArray)
         {
             //Choose a random number of objects to instantiate within the minimum and maximum limits
             int objectCount = 13;
@@ -154,7 +173,7 @@ namespace Completed
                 {
                     //Choose a random tile from tileArray and assign it to tileChoice
                     tileChoice = tileArray[0];
-                    //Instantiate tileChoice at the position returned by RandomPosition with no change in rotation
+                    
                     if (Random.Range(0, 2) == 1)
                     {
                         randomPosition = new Vector3(51, i, 0f);
@@ -167,12 +186,23 @@ namespace Completed
                     }
                     if (Random.Range(0, 2) == 1)
                     {
+                        randomPosition = new Vector3(12, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
                         randomPosition = new Vector3(15, i, 0f);
                         Instantiate(tileChoice, randomPosition, Quaternion.identity);
                     }
                     if (Random.Range(0, 2) == 1)
                     {
                         randomPosition = new Vector3(25, i, 0f);
+                        Instantiate(tileChoice, randomPosition, Quaternion.identity);
+
+                    }
+                    if (Random.Range(0, 2) == 1)
+                    {
+                        randomPosition = new Vector3(28, i, 0f);
                         Instantiate(tileChoice, randomPosition, Quaternion.identity);
                     }
                     if (Random.Range(0, 2) == 1)
@@ -208,7 +238,7 @@ namespace Completed
                 }
                 else
                 {
-                    if (Random.Range(0, 2) == 1)
+                    if (Random.Range(0, 4) == 1)
                     {
                         tileChoice = tileArray[0];
                         randomPosition = new Vector3(51, i, 0f);
@@ -231,7 +261,7 @@ namespace Completed
 
                 //Remove the entry at randomIndex from the list so that it can't be re-used.
                 gridPositions.RemoveAt(randomIndex);
-            } while ((randomPosition.x > 50) || (randomPosition.x == 7) || (randomPosition.x == 15) || (randomPosition.x == 25) || (randomPosition.x == 30) || (randomPosition.x == 33) || (randomPosition.x == 40) || (randomPosition.x == 42) || (randomPosition.x == 45) || (randomPosition.x == 48));
+            } while ((randomPosition.x > 50) || (randomPosition.x == 7) || (randomPosition.x == 12) || (randomPosition.x == 15) || (randomPosition.x == 25) || (randomPosition.x == 28) || (randomPosition.x == 30) || (randomPosition.x == 33) || (randomPosition.x == 40) || (randomPosition.x == 42) || (randomPosition.x == 45) || (randomPosition.x == 48));
             //Return the randomly selected Vector3 position.
             return randomPosition;
         }
@@ -256,7 +286,8 @@ namespace Completed
 
             //Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
             start = true;
-            SpawnBullet(enemyTiles, 15, 20);
+            SpawnBullet(enemyTiles);
+            //LayoutAllyAtRandom(allyTiles, 25, 30);
             start = false;
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
